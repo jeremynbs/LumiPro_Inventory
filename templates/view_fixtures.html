@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('manage_fixtures') }}">Fixtures</a></li>
+            <li class="breadcrumb-item active">{{ fixture.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-lightbulb fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ fixture.name }}</h3>
+                    <p class="text-muted">{{ fixture.sku }}</p>
+                    <hr>
+                    <div class="text-start">
+                        <label class="extra-small text-uppercase fw-bold text-muted d-block mb-1">Supplier</label>
+                        <p class="mb-3"><i class="bi bi-factory me-2"></i>{{ fixture.supplier_name or "Generic" }}</p>
+                        
+                        <label class="extra-small text-uppercase fw-bold text-muted d-block mb-1">Category</label>
+                        <p class="mb-0"><i class="bi bi-tag me-2"></i>{{ fixture.category_name or "Uncategorized" }}</p>
+                    </div>
+                    <div class="mt-4 d-grid gap-2">
+                        <a href="{{ url_for('edit_fixture', id=fixture.id) }}" class="btn btn-dark rounded-pill">
+                            <i class="bi bi-pencil me-2"></i>Edit Specifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary">Technical Specifications</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 text-muted w-50">Internal Model</td>
+                                <td class="fw-bold">{{ fixture.model_name or "N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 text-muted">Factory Model</td>
+                                <td class="fw-bold">{{ fixture.factory_model_name or "N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 text-muted">Wattage</td>
+                                <td><span class="badge bg-light text-dark border">{{ fixture.power_watts or "0" }}W</span></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 text-muted">IP Rating</td>
+                                <td><code>{{ fixture.ip_rating or "IP20" }}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 text-muted">Color</td>
+                                <td>{{ fixture.color or "Standard" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 text-muted">Beam Angle</td>
+                                <td>{{ fixture.beam_angle or "N/A" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">Commercials</h6></div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Price (USD)</small>
+                                <span class="fw-bold text-success">${{ "{:,.2f}".format(fixture.cost or 0) }}</span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Price (SGD)</small>
+                                <span class="fw-bold text-success">S${{ "{:,.2f}".format(fixture.price_sgd or 0) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">Remarks</h6></div>
+                        <div class="card-body">
+                            <p class="small text-muted mb-0 italic">{{ fixture.remarks or "No additional notes provided for this model." }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .extra-small { font-size: 0.7rem; }
+    .italic { font-style: italic; }
+</style>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumb for navigation context -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('manage_stock') }}">Stock Registry</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ action }} Unit</li>
+                </ol>
+            </nav>
+
+            <!-- Bulk Operations Section (Only visible when adding) -->
+            {% if action == 'Add' %}
+            <div class="card border-primary shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Bulk Operations</h5>
+                    <a href="{{ url_for('export_stock_csv') }}" class="btn btn-sm btn-light">
+                        <i class="bi bi-download me-1"></i> Export Current Stock
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Bulk Import Form -->
+                    <form action="{{ url_for('bulk_upload_stock') }}" method="post" enctype="multipart/form-data" class="mb-4">
+                        <h6 class="fw-bold text-primary mb-3">Option A: Import New Units</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase">1. Target Fixture Model</label>
+                                <select name="fixture_id" class="form-select" required>
+                                    <option value="">-- Select Model --</option>
+                                    {% for f in fixtures %}
+                                    <option value="{{ f.id }}">{{ f.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase">2. Target Warehouse</label>
+                                <select name="warehouse_id" class="form-select" required>
+                                    <option value="">-- Select Destination --</option>
+                                    {% for w in warehouses %}
+                                    <option value="{{ w.id }}">{{ w.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small text-uppercase">3. Select CSV File</label>
+                                <input type="file" name="file" class="form-control" accept=".csv" required>
+                            </div>
+                        </div>
+                        <div class="alert alert-secondary py-2 px-3 mb-3 small">
+                            <i class="bi bi-info-circle me-1"></i> 
+                            <strong>Required Headers:</strong> <code>serial_number, mfg_date</code>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-upload me-1"></i> Start Bulk Import
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Bulk Update Form -->
+                    <form action="{{ url_for('bulk_update_stock_csv') }}" method="post" enctype="multipart/form-data" class="mt-4">
+                        <h6 class="fw-bold text-warning mb-3">Option B: Update Existing Units</h6>
+                        <p class="text-muted small">Export the stock registry first, modify statuses or dates, and upload it back.</p>
+                        <div class="mb-3">
+                            <input type="file" name="file" class="form-control" accept=".csv" required>
+                        </div>
+                        <div class="alert alert-warning py-2 px-3 mb-3 small">
+                            <i class="bi bi-exclamation-triangle me-1"></i> 
+                            Updates are matched by <code>serial_number</code>. Headers must include: <code>serial_number, status, mfg_date</code>.
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="bi bi-arrow-repeat me-1"></i> Process Bulk Updates
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mb-4">
+                <span class="text-muted small">--- OR MANUALLY ADD SINGLE UNIT BELOW ---</span>
+            </div>
+            {% endif %}
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi {% if action == 'Add' %}bi-plus-circle{% else %}bi-pencil-square{% endif %} me-2"></i>
+                        {{ action }} Stock Unit
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="" method="post" id="stockForm">
+                        <!-- Unit Identity Section -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fixture Model</label>
+                                <select name="fixture_id" class="form-select" {% if action == 'Edit' %}disabled{% endif %} required>
+                                    <option value="">-- Select Equipment Model --</option>
+                                    {% for f in fixtures %}
+                                    <option value="{{ f.id }}" {% if stock and stock.fixture_id == f.id %}selected{% endif %}>
+                                        {{ f.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if action == 'Edit' %}
+                                <input type="hidden" name="fixture_id" value="{{ stock.fixture_id }}">
+                                <small class="text-muted">Model cannot be changed after registration.</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Serial Number</label>
+                                <input type="text" name="serial_number" value="{{ stock.serial_number if stock }}" 
+                                       class="form-control font-monospace" placeholder="SN-XXXX-XXXX" 
+                                       {% if action == 'Edit' %}disabled{% endif %} required>
+                                {% if action == 'Edit' %}
+                                <input type="hidden" name="serial_number" value="{{ stock.serial_number }}">
+                                <small class="text-muted">Serial number is locked for auditing.</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Status & Logistics Section -->
+                        <h6 class="mb-3 text-primary"><i class="bi bi-geo-alt me-2"></i>Status & Location</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Current Status</label>
+                                <select name="status" id="statusSelect" class="form-select" required>
+                                    <option value="FOR SALE" {% if stock and stock.status == 'FOR SALE' %}selected{% endif %}>For Sale (Warehouse)</option>
+                                    <option value="INSTALLED" {% if stock and stock.status == 'INSTALLED' %}selected{% endif %}>Installed at Client Site</option>
+                                    <option value="MAINTENANCE" {% if stock and stock.status == 'MAINTENANCE' %}selected{% endif %}>Under Maintenance</option>
+                                    <option value="SOLD" {% if stock and stock.status == 'SOLD' %}selected{% endif %}>Sold / Finalized</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Current Warehouse</label>
+                                <select name="warehouse_id" id="warehouseSelect" class="form-select">
+                                    <option value="">-- None (Deployed or Sold) --</option>
+                                    {% for w in warehouses %}
+                                    <option value="{{ w.id }}" {% if stock and stock.warehouse_id == w.id %}selected{% endif %}>
+                                        {{ w.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Assigned Client</label>
+                                <select name="client_id" id="clientSelect" class="form-select">
+                                    <option value="">-- No Client Assigned --</option>
+                                    {% for c in clients %}
+                                    <option value="{{ c.id }}" {% if stock and stock.client_id == c.id %}selected{% endif %}>
+                                        {{ c.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Installation Date</label>
+                                <input type="date" name="install_date" value="{{ stock.install_date if stock }}" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label text-muted fw-bold">Manufacturing Date</label>
+                                <input type="date" name="mfg_date" value="{{ stock.mfg_date if stock }}" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-3 border-top d-flex justify-content-between">
+                            <a href="{{ url_for('manage_stock') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="bi bi-check-circle me-1"></i> Save Unit Details
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contextual Help -->
+            <div class="alert alert-light border mt-4 small">
+                <h6 class="alert-heading small fw-bold text-dark"><i class="bi bi-info-circle me-1"></i> Data Integrity Rules:</h6>
+                <ul class="mb-0 text-muted">
+                    <li>Assigning a <strong>Client</strong> will automatically mark the status as <strong>SOLD</strong> and remove the unit from its warehouse.</li>
+                    <li>Serial Numbers must be unique across the entire registry.</li>
+                    <li>Bulk uploads require selecting a model and warehouse. The CSV only needs: <code>serial_number, mfg_date</code>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const clientSelect = document.getElementById('clientSelect');
+    const warehouseSelect = document.getElementById('warehouseSelect');
+    const statusSelect = document.getElementById('statusSelect');
+
+    if (clientSelect) {
+        clientSelect.addEventListener('change', function() {
+            if (this.value !== "") {
+                warehouseSelect.value = "";
+                statusSelect.value = "SOLD";
+                
+                warehouseSelect.classList.add('is-valid');
+                statusSelect.classList.add('is-valid');
+                setTimeout(() => {
+                    warehouseSelect.classList.remove('is-valid');
+                    statusSelect.classList.remove('is-valid');
+                }, 1500);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

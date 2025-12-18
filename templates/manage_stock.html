@@ -1,0 +1,182 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container-fluid py-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Inventory Tracking</h2>
+            <p class="text-muted mb-0">Monitor individual units and their deployment status.</p>
+        </div>
+        <a href="{{ url_for('add_stock') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-qr-code-scan"></i> Register New Unit
+        </a>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="stockSearch" class="form-control border-start-0" placeholder="Filter by Serial Number..." onkeyup="filterTable()">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="modelFilter" class="form-select" onchange="filterTable()">
+                        <option value="">All Model Names</option>
+                        {% set models = [] %}
+                        {% for s in stocks %}
+                            {% if s.fixture_name not in models %}
+                                <option value="{{ s.fixture_name|upper }}">{{ s.fixture_name }}</option>
+                                {% set _ = models.append(s.fixture_name) %}
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="statusFilter" class="form-select" onchange="filterTable()">
+                        <option value="">All Statuses</option>
+                        <option value="FOR SALE">FOR SALE</option>
+                        <option value="INSTALLED">INSTALLED</option>
+                        <option value="MAINTENANCE">MAINTENANCE</option>
+                        <option value="SOLD">SOLD</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="stockTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Serial Number</th>
+                        <th>Model Name</th>
+                        <th>MFG Date</th>
+                        <th>Current Location</th>
+                        <th>Status</th>
+                        <th>Deployment</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="stockTableBody">
+                    {% for s in stocks %}
+                    <tr class="stock-row" 
+                        data-location="{% if s.warehouse_id %}{{ s.warehouse_name }}{% elif s.client_id %}Client Site{% else %}Unknown{% endif %}"
+                        data-model="{{ s.fixture_name }}"
+                        data-serial="{{ s.serial_number }}"
+                        data-status="{{ s.status|upper }}">
+                        <td class="ps-4">
+                            <span class="badge bg-light text-dark border font-monospace serial-text">{{ s.serial_number }}</span>
+                        </td>
+                        <td class="model-text"><strong>{{ s.fixture_name }}</strong></td>
+                        <td class="text-muted small">
+                            {{ s.mfg_date if s.mfg_date else 'N/A' }}
+                        </td>
+                        <td class="location-text">
+                            {% if s.warehouse_id %}
+                                <i class="bi bi-house text-primary"></i> {{ s.warehouse_name }}
+                            {% elif s.client_id %}
+                                <i class="bi bi-geo-alt text-success"></i> Client Site
+                            {% else %}
+                                <span class="text-muted">In Transit / Unknown</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set status_class = 'bg-success' %}
+                            {% if s.status|upper == 'MAINTENANCE' %}{% set status_class = 'bg-warning text-dark' %}
+                            {% elif s.status|upper == 'SOLD' %}{% set status_class = 'bg-danger' %}
+                            {% elif s.status|upper == 'INSTALLED' %}{% set status_class = 'bg-info text-dark' %}{% endif %}
+                            <span class="badge {{ status_class }} status-text">{{ s.status|upper }}</span>
+                        </td>
+                        <td>
+                            {% if s.client_id %}
+                                <div class="small">
+                                    <div class="fw-bold">{{ s.client_name }}</div>
+                                    <div class="text-muted small">Installed: {{ s.install_date or 'N/A' }}</div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <a href="{{ url_for('edit_stock', id=s.id) }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i> Update
+                                </a>
+                                <form action="{{ url_for('delete_stock', id=s.id) }}" method="post" class="d-inline" onsubmit="return confirm('Remove this unit from system?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not stocks %}
+                    <tr id="noResultsRow">
+                        <td colspan="7" class="text-center py-5 text-muted">No stock units found. Register equipment to begin tracking.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const searchInput = document.getElementById('stockSearch').value.toUpperCase();
+    const modelFilter = document.getElementById('modelFilter').value.toUpperCase();
+    const statusFilter = document.getElementById('statusFilter').value.toUpperCase();
+    const rows = Array.from(document.getElementsByClassName('stock-row'));
+
+    rows.forEach(row => {
+        const serial = row.getAttribute('data-serial').toUpperCase();
+        const model = row.getAttribute('data-model').toUpperCase();
+        const status = row.getAttribute('data-status').toUpperCase();
+        
+        const matchesSearch = serial.includes(searchInput);
+        const matchesModel = modelFilter === "" || model === modelFilter;
+        const matchesStatus = statusFilter === "" || status === statusFilter;
+
+        if (matchesSearch && matchesModel && matchesStatus) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+function sortTable() {
+    const tbody = document.getElementById('stockTableBody');
+    const rows = Array.from(tbody.querySelectorAll('.stock-row'));
+
+    // Sort priority: Location -> Model Name -> Serial Number -> Status
+    rows.sort((a, b) => {
+        const locA = a.getAttribute('data-location');
+        const locB = b.getAttribute('data-location');
+        if (locA !== locB) return locA.localeCompare(locB);
+
+        const modelA = a.getAttribute('data-model');
+        const modelB = b.getAttribute('data-model');
+        if (modelA !== modelB) return modelA.localeCompare(modelB);
+
+        const serialA = a.getAttribute('data-serial');
+        const serialB = b.getAttribute('data-serial');
+        if (serialA !== serialB) return serialA.localeCompare(serialB);
+
+        const statusA = a.getAttribute('data-status');
+        const statusB = b.getAttribute('data-status');
+        return statusA.localeCompare(statusB);
+    });
+
+    // Re-append rows in sorted order
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Initial sort on load
+document.addEventListener('DOMContentLoaded', sortTable);
+</script>
+{% endblock %}

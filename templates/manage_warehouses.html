@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Warehouse Management</h2>
+            <p class="text-muted mb-0">Monitor storage capacity and physical locations.</p>
+        </div>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addWarehouseModal">
+            <i class="bi bi-plus-lg"></i> Add New Warehouse
+        </button>
+    </div>
+
+    <!-- Warehouse Table -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Warehouse Name</th>
+                        <th>Address / Location</th>
+                        <th class="text-center">Stock Volume</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in warehouses %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ w.name }}</div>
+                            <small class="text-muted">ID: #{{ w.id }}</small>
+                        </td>
+                        <td>{{ w.location or '<span class="text-muted small">No address set</span>'|safe }}</td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill {% if w.unit_count > 0 %}bg-info text-dark{% else %}bg-light text-muted border{% endif %}">
+                                {{ w.unit_count }} Units
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <a href="{{ url_for('view_warehouse', id=w.id) }}" class="btn btn-sm btn-outline-primary">
+                                    View Stock
+                                </a>
+                                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editWarehouse{{ w.id }}">
+                                    Edit
+                                </button>
+                                <form action="{{ url_for('delete_warehouse', id=w.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                            {% if w.unit_count > 0 %}disabled title="Empty the warehouse before deleting"{% endif %}
+                                            onclick="return confirm('Delete this storage location?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addWarehouseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('add_warehouse') }}" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Warehouse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Warehouse Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. North Wing Storage" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Location / Address</label>
+                    <textarea name="location" class="form-control" rows="2" placeholder="Full address or internal coordinates..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary w-100">Save Warehouse</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modals -->
+{% for w in warehouses %}
+<div class="modal fade" id="editWarehouse{{ w.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('edit_warehouse', id=w.id) }}" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit: {{ w.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Warehouse Name</label>
+                    <input type="text" name="name" value="{{ w.name }}" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Location / Address</label>
+                    <textarea name="location" class="form-control" rows="2">{{ w.location }}</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary w-100">Update Warehouse</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

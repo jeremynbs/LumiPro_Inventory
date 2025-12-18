@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ title }} Management</h2>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addClientModal">
+            <i class="bi bi-plus-lg"></i> Add New Client
+        </button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="text-uppercase opacity-75 small">Total Clients</h6>
+                    <h3 class="mb-0">{{ data|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clients Table -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Client Name</th>
+                        <th>Contact Information</th>
+                        <th class="text-center">Active Units</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in data %}
+                    <tr>
+                        <td class="ps-4 text-muted">{{ c.id }}</td>
+                        <td><strong>{{ c.name }}</strong></td>
+                        <td>{{ c.contact_info }}</td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill {% if c.unit_count > 0 %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ c.unit_count }} units
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <a href="{{ url_for('view_client', id=c.id) }}" class="btn btn-sm btn-outline-primary">
+                                    View Site
+                                </a>
+                                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editClient{{ c.id }}">
+                                    Edit
+                                </button>
+                                <form action="{{ url_for('delete_client', id=c.id) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure? This will fail if client has equipment.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not data %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">No clients found in the database.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('add_client') }}" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Client Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Client/Company Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Marina Bay Sands" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Details</label>
+                    <textarea name="contact_info" class="form-control" rows="3" placeholder="Address, Email, or Phone..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Client</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Client Modals -->
+{% for c in data %}
+<div class="modal fade" id="editClient{{ c.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('edit_client', id=c.id) }}" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit: {{ c.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Client Name</label>
+                    <input type="text" name="name" value="{{ c.name }}" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Details</label>
+                    <textarea name="contact_info" class="form-control" rows="3">{{ c.contact_info }}</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

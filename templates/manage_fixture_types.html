@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Fixture Categories</h2>
+            <p class="text-muted mb-0">Define types like Moving Heads, Pars, or Control Desks.</p>
+        </div>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addTypeModal">
+            <i class="bi bi-plus-circle"></i> Add Category
+        </button>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="ps-4" style="width: 100px;">ID</th>
+                                <th>Category Name</th>
+                                <th class="text-center">Linked Models</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in types %}
+                            <tr>
+                                <td class="ps-4 text-muted">#{{ t.id }}</td>
+                                <td><strong>{{ t.name }}</strong></td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill bg-light text-dark border">
+                                        {{ t.model_count }} Models
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-warning" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editType{{ t.id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form action="{{ url_for('delete_fixture_type', id=t.id) }}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    {% if t.model_count > 0 %}disabled title="Category in use"{% endif %}
+                                                    onclick="return confirm('Delete this category?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Helpful Tip Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 bg-light shadow-sm">
+                <div class="card-body">
+                    <h6><i class="bi bi-lightbulb text-warning"></i> Pro Tip</h6>
+                    <p class="small text-muted">
+                        Categories help you organize your inventory. When you create a new <strong>Fixture Model</strong>, 
+                        you'll assign it one of these types to make searching and reporting easier.
+                    </p>
+                    <hr>
+                    <p class="small text-danger mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> You cannot delete a category if it still has models assigned to it.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addTypeModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <form action="{{ url_for('add_fixture_type') }}" method="post" class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title">New Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" name="name" class="form-control" placeholder="e.g. LED Wash" required autofocus>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="submit" class="btn btn-primary w-100">Create Category</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modals -->
+{% for t in types %}
+<div class="modal fade" id="editType{{ t.id }}" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <form action="{{ url_for('edit_fixture_type', id=t.id) }}" method="post" class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" name="name" value="{{ t.name }}" class="form-control" required>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
