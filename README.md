@@ -96,13 +96,3 @@ Access the dashboard at: `http://127.0.0.1:5000`
 ## 📝 License
 
 Proprietary software for **LUMIPRO**. All rights reserved.
-
-```
-
-### Why this README works:
-1.  **Professional Visuals**: The use of icons and structured lists makes it easy for a developer or stakeholder to read.
-2.  **Clear Architecture**: It explains how your files relate to each other.
-3.  **Logical Flow**: It highlights the specific "Business Logic" you wrote into your `app.py` (like the status-changing rules).
-4.  **Actionable**: It gives clear instructions on how to get the project running.
-
-```
