@@ -40,21 +40,32 @@
                         <td><strong>{{ c.name }}</strong></td>
                         <td>{{ c.contact_info }}</td>
                         <td class="text-center">
-                            <span class="badge rounded-pill {% if c.unit_count > 0 %}bg-success{% else %}bg-secondary{% endif %}">
+                            <span
+                                class="badge rounded-pill {% if c.unit_count > 0 %}bg-success{% else %}bg-secondary{% endif %}">
                                 {{ c.unit_count }} units
                             </span>
                         </td>
                         <td class="text-end pe-4">
                             <div class="btn-group">
                                 <a href="{{ url_for('view_client', id=c.id) }}" class="btn btn-sm btn-outline-primary">
-                                    View Site
+                                    <i class="bi bi-eye"> View</i>
                                 </a>
-                                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editClient{{ c.id }}">
-                                    Edit
+                                <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal"
+                                    data-bs-target="#editClient{{ c.id }}">
+                                    <i class="bi bi-pencil"> Update</i>
                                 </button>
-                                <form action="{{ url_for('delete_client', id=c.id) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure? This will fail if client has equipment.');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                </form>
+
+                                {% if c.unit_count > 0 %}
+                                <button class="btn btn-sm btn-outline-danger" disabled
+                                    title="Cannot delete client with active units assigned">
+                                    <i class="bi bi-trash"> Delete</i>
+                                </button>
+                                {% else %}
+                                <a href="{{ url_for('delete_client', id=c.id) }}" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Are you sure you want to delete this client?')">
+                                    <i class="bi bi-trash"> Delete</i>
+                                </a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -85,7 +96,8 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Contact Details</label>
-                    <textarea name="contact_info" class="form-control" rows="3" placeholder="Address, Email, or Phone..."></textarea>
+                    <textarea name="contact_info" class="form-control" rows="3"
+                        placeholder="Address, Email, or Phone..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">

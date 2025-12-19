@@ -128,9 +128,8 @@
                                 <label class="form-label fw-bold">Current Status</label>
                                 <select name="status" id="statusSelect" class="form-select" required>
                                     <option value="FOR SALE" {% if stock and stock.status == 'FOR SALE' %}selected{% endif %}>For Sale (Warehouse)</option>
-                                    <option value="INSTALLED" {% if stock and stock.status == 'INSTALLED' %}selected{% endif %}>Installed at Client Site</option>
                                     <option value="MAINTENANCE" {% if stock and stock.status == 'MAINTENANCE' %}selected{% endif %}>Under Maintenance</option>
-                                    <option value="SOLD" {% if stock and stock.status == 'SOLD' %}selected{% endif %}>Sold / Finalized</option>
+                                    <option value="SOLD" {% if stock and stock.status == 'SOLD' %}selected{% endif %}>Sold</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
