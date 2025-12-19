@@ -95,4 +95,4 @@ Access the dashboard at: `http://127.0.0.1:5000`
 
 ## 📝 License
 
-Proprietary software for **LUMIPRO**. All rights reserved.
+Proprietary software for **LumiPro**. All rights reserved.
