@@ -13,6 +13,8 @@ db_path = os.path.join(BASE_DIR, 'database.db')
 app = Flask(__name__)
 DATABASE = 'database.db'
 
+application = app  # For passenger_wsgi compatibility
+
 app.secret_key = 'lamdashirtproductions' # Replace with a random string
 
 def get_db():
