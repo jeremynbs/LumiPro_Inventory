@@ -807,6 +807,7 @@ def bulk_update_stock_csv():
             raw_install = row.get('install_date', '').strip()
             w_name = row.get('warehouse_name', '').strip()
             c_name = row.get('client_name', '').strip()
+            f_name = row.get('fixture_name', '').strip()
             
             if not sn:
                 continue
@@ -841,6 +842,13 @@ def bulk_update_stock_csv():
                     client_id = cursor.lastrowid
                     new_clients += 1
 
+            # 2.5. Hanndle Fixture Name Verification (Optional)
+            if f_name:
+                f_row = db.execute("SELECT id FROM fixtures WHERE name = ?", (f_name,)).fetchone()
+                if not f_row:
+                    errors.append(f"Row {row_idx}: Fixture '{f_name}' not found.")
+                    continue
+
             # 3. Normalize dates
             mfg_date = parse_date(raw_mfg)
             install_date = parse_date(raw_install)
@@ -852,9 +860,10 @@ def bulk_update_stock_csv():
                     mfg_date = COALESCE(?, mfg_date), 
                     install_date = ?, 
                     warehouse_id = ?, 
-                    client_id = ? 
+                    client_id = ?, 
+                    fixture_id = ?
                 WHERE serial_number = ?
-            """, (new_status, mfg_date, install_date, warehouse_id, client_id, sn))
+            """, (new_status, mfg_date, install_date, warehouse_id, client_id, f_row['id'], sn))
             
             update_count += 1
 
