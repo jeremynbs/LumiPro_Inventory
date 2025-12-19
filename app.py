@@ -4,6 +4,11 @@ from datetime import datetime
 import csv
 import pandas as pd
 import io
+import os
+
+# Define the absolute path to your database file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, 'database.db')
 
 app = Flask(__name__)
 DATABASE = 'database.db'
