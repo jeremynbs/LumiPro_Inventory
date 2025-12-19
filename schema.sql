@@ -14,25 +14,24 @@ CREATE TABLE IF NOT EXISTS fixture_types (
 );
 
 -- Table: Fixtures (The Master Product List)
--- DROP TABLE IF EXISTS fixtures;
 
 CREATE TABLE IF NOT EXISTS fixtures (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     model_name TEXT,
-    factory_model_name TEXT, -- Added
+    factory_model_name TEXT,
     sku TEXT UNIQUE,
     type_id INTEGER,
     supplier_id INTEGER,
     power_watts INTEGER,
-    color TEXT,              -- Added
-    beam_angle TEXT,         -- Added
-    ip_rating TEXT,          -- Added
-    remarks TEXT,            -- Added
+    color TEXT,
+    beam_angle TEXT,
+    ip_rating TEXT,
+    remarks TEXT,
     weight_kg REAL,
-    cost REAL,               -- Added
-    price_sgd REAL,          -- Added
-    price_usd REAL,          -- Added
+    cost REAL,
+    price_sgd REAL,
+    price_usd REAL,
     FOREIGN KEY (type_id) REFERENCES fixture_types (id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers (id)
 );
@@ -45,8 +44,7 @@ CREATE TABLE IF NOT EXISTS warehouses (
 );
 
 -- Updated Stock Table for Individual Unit Tracking
-DROP TABLE IF EXISTS stock;
-CREATE TABLE stock (
+CREATE TABLE IF NOT EXISTS stock (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fixture_id INTEGER NOT NULL,
     serial_number TEXT UNIQUE, 
