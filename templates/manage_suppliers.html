@@ -53,14 +53,14 @@
                             <div class="btn-group">
                                 <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
                                     data-bs-target="#editSupplier{{ s.id }}" title="Edit Details">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil"></i> Update
                                 </button>
                                 <form action="{{ url_for('delete_supplier', id=s.id) }}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" {% if s.fixture_count> 0
                                         %}disabled title="Cannot delete supplier with active fixture profiles"{% endif
                                         %}
                                         onclick="return confirm('Permanently delete this supplier?');">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </form>
                             </div>

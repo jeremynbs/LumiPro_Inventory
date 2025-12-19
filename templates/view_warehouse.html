@@ -49,7 +49,7 @@
                         <th class="ps-4">Serial Number</th>
                         <th>Equipment Model</th>
                         <th>Condition/Status</th>
-                        <th>Last Updated</th>
+                        <!-- <th>Last Updated</th> -->
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -69,12 +69,12 @@
                             {% endif %}
                             <span class="badge {{ status_class }}">{{ s.status }}</span>
                         </td>
-                        <td class="text-muted small">
+                        <!-- <td class="text-muted small">
                             {{ s.updated_at or 'N/A' }}
-                        </td>
+                        </td> -->
                         <td class="text-end pe-4">
                             <a href="{{ url_for('edit_stock', id=s.id) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-arrow-right-short"></i> Manage Unit
+                                <i class="bi bi-pencil"></i> Manage Unit
                             </a>
                         </td>
                     </tr>

@@ -39,16 +39,16 @@
                         <td class="text-end pe-4">
                             <div class="btn-group">
                                 <a href="{{ url_for('view_warehouse', id=w.id) }}" class="btn btn-sm btn-outline-primary">
-                                    View Stock
+                                    <i class="bi bi-eye"></i> View
                                 </a>
                                 <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editWarehouse{{ w.id }}">
-                                    Edit
+                                    <i class="bi bi-pencil"></i> Update
                                 </button>
                                 <form action="{{ url_for('delete_warehouse', id=w.id) }}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" 
                                             {% if w.unit_count > 0 %}disabled title="Empty the warehouse before deleting"{% endif %}
                                             onclick="return confirm('Delete this storage location?');">
-                                        Delete
+                                        <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </form>
                             </div>
