@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/jerepnkw/lumipro/
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/touch $DEPLOYPATH/tmp/restart.txt
