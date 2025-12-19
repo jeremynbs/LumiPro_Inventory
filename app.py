@@ -264,6 +264,7 @@ def add_fixture():
             request.form.get('color'),
             request.form.get('beam_angle'),
             request.form.get('ip_rating'),
+            request.form.get('weight_kg'),
             request.form.get('cost'),
             request.form.get('price_sgd'),
             request.form.get('price_usd'),
@@ -274,9 +275,9 @@ def add_fixture():
             db.execute("""
                 INSERT INTO fixtures (
                     name, model_name, factory_model_name, sku, type_id, 
-                    supplier_id, power_watts, color, beam_angle, ip_rating, 
+                    supplier_id, power_watts, color, beam_angle, ip_rating, weight_kg, 
                     cost, price_sgd, price_usd, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, data)
             db.commit()
             flash(f"Fixture model '{request.form.get('name')}' added.", "success")
@@ -327,6 +328,7 @@ def edit_fixture(id):
             request.form.get('color'),
             request.form.get('beam_angle'),
             request.form.get('ip_rating'),
+            request.form.get('weight_kg'),
             request.form.get('cost'),
             request.form.get('price_sgd'),
             request.form.get('price_usd'),
@@ -336,7 +338,7 @@ def edit_fixture(id):
         db.execute("""
             UPDATE fixtures SET 
                 name=?, model_name=?, factory_model_name=?, sku=?, type_id=?, 
-                supplier_id=?, power_watts=?, color=?, beam_angle=?, ip_rating=?, 
+                supplier_id=?, power_watts=?, color=?, beam_angle=?, ip_rating=?, weight_kg=?,
                 cost=?, price_sgd=?, price_usd=?, remarks=?
             WHERE id=?
         """, data)
