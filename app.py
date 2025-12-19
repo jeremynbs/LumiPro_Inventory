@@ -17,6 +17,31 @@ application = app  # For passenger_wsgi compatibility
 
 app.secret_key = 'lamdashirtproductions' # Replace with a random string
 
+def check_and_init_db():
+    db_path = 'your_database.db'  # Change this to your actual .db filename
+    
+    # Check if the file exists first
+    if not os.path.exists(db_path):
+        print("Database file missing. Initializing...")
+        import db_init  # This runs your script if it's in the same folder
+        return
+
+    # If file exists, check if a specific table (e.g., 'users') exists
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        # Change 'users' to a table name that SHOULD be there
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';")
+        if not cursor.fetchone():
+            print("Tables missing. Running initialization...")
+            import db_init
+        conn.close()
+    except Exception as e:
+        print(f"Database check failed: {e}")
+
+# Run the check
+check_and_init_db()
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
