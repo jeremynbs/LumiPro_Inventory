@@ -25,6 +25,14 @@ def get_db():
         db.row_factory = sqlite3.Row
     return db
 
+def init_db():
+    with app.app_context():
+        db = get_db()
+        with open('schema.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+        print("Database Initialized!")
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
@@ -1017,6 +1025,6 @@ def inventory():
 # -------------------------------- RUN THE APP --------------------------------
 
 if __name__ == "__main__":
-    import os
+    init_db()  # Ensure DB is initialized on startup
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
