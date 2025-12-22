@@ -1011,6 +1011,14 @@ def inventory():
         ORDER BY c.name ASC
     """).fetchall()
 
+    under_maintenance_clients = db.execute("""
+        SELECT DISTINCT c.id, c.name 
+        FROM clients c
+        JOIN stock s ON c.id = s.client_id
+        WHERE UPPER(s.status) = 'MAINTENANCE' OR UPPER(s.status) = 'REPAIR'
+        ORDER BY c.name ASC
+    """).fetchall()
+
     db.close()
     return render_template('inventory.html', 
                            stats=stats, 
@@ -1020,6 +1028,7 @@ def inventory():
                            sales_split=sales_split,
                            sold_to_clients=sold_to_clients,
                            now=now,
+                           under_maintenance_clients=under_maintenance_clients,
                            title="Inventory")
 
 # -------------------------------- RUN THE APP --------------------------------
