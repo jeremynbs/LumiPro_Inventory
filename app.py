@@ -953,7 +953,7 @@ def inventory():
             COUNT(*) as total_units,
             COALESCE(SUM(CASE WHEN status IN ('In Warehouse', 'FOR SALE') THEN 1 ELSE 0 END), 0) as in_stock,
             COALESCE(SUM(CASE WHEN status IN ('Sold', 'sold', 'SOLD') THEN 1 ELSE 0 END), 0) as total_sold,
-            COALESCE(SUM(CASE WHEN status IN ('Maintenance', 'Repair') THEN 1 ELSE 0 END), 0) as in_repair
+            COALESCE(SUM(CASE WHEN status IN ('Maintenance', 'Repair', 'MAINTENANCE', 'REPAIR') THEN 1 ELSE 0 END), 0) as in_repair
         FROM stock
     """).fetchone()
 
@@ -985,7 +985,7 @@ def inventory():
         FROM stock s
         JOIN fixtures f ON s.fixture_id = f.id
         LEFT JOIN warehouses w ON s.warehouse_id = w.id
-        WHERE s.status IN ('Maintenance', 'In Transit', 'Repair')
+        WHERE UPPER(s.status) IN ('MAINTENANCE', 'IN TRANSIT', 'REPAIR')
         ORDER BY s.status ASC
     """).fetchall()
 
